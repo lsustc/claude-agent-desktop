@@ -1,4 +1,4 @@
-# Claude Agent Desktop
+# Lumi
 
 A desktop AI agent application built with Electron, React, and the Claude Agent SDK. Its core feature is inline Generative UI rendering (charts, dashboards, interactive widgets) powered by morphdom, similar to Claude.ai's visualization capabilities.
 
@@ -120,7 +120,7 @@ Claude calls show_widget({ widget_code: "<style>...<div>...<script>..." })
 ### Install and run
 
 ```bash
-cd claude-agent-desktop
+cd lumi
 npm install
 npm run dev
 ```

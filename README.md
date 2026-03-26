@@ -1,4 +1,4 @@
-# Claude Agent Desktop
+# Lumi
 
 基于 Electron + React + Claude Agent SDK 的桌面 AI Agent 应用。核心特色是内联 Generative UI 渲染（图表、仪表盘、交互组件），通过 morphdom 实现类似 Claude.ai 官网的可视化效果。
 
@@ -124,7 +124,7 @@ Claude 调用 show_widget({ widget_code: "<style>...<div>...<script>..." })
 ### 安装运行
 
 ```bash
-cd claude-agent-desktop
+cd lumi
 npm install
 npm run dev
 ```
@@ -156,7 +156,7 @@ npm run build:linux  # Linux .AppImage
 ## 项目结构
 
 ```
-claude-agent-desktop/
+lumi/
 ├── electron-vite.config.ts          # Electron + Vite 构建配置
 ├── tailwind.config.ts               # Tailwind + typography 插件
 ├── package.json

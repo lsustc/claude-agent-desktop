@@ -201,9 +201,20 @@ async function listenToOutput(chatId: string, entry: SessionEntry): Promise<void
         sessionStore.setSdkSessionId(chatId, value.session_id)
       }
 
-      // Detect show_widget tool start from stream_events → send loading state immediately
+      // Handle stream_events for real-time streaming
       if (value.type === 'stream_event' && value.event) {
         const evt = value.event
+
+        // Text delta → stream to renderer immediately
+        if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta' && evt.delta.text) {
+          sendToRenderer({
+            chatId,
+            type: 'text_delta',
+            content: evt.delta.text
+          })
+        }
+
+        // Widget tool start → show loading
         if (evt.type === 'content_block_start' && evt.content_block?.type === 'tool_use' &&
             evt.content_block.name === 'mcp__generative-ui__show_widget' && !widgetLoadingSent) {
           widgetLoadingSent = true
@@ -216,7 +227,7 @@ async function listenToOutput(chatId: string, entry: SessionEntry): Promise<void
             isStreaming: true
           })
         }
-        // Skip all other stream_events (handled by full messages)
+
         continue
       }
 

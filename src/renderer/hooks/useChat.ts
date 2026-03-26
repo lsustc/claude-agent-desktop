@@ -31,17 +31,55 @@ export function useChat() {
       }
 
       setMessages((prev) => {
-        // Widget events: always replace the last widget entry (streaming or final)
+        // Text delta: append to the last streaming text message, or create one
+        if (event.type === 'text_delta' && event.content) {
+          const lastIdx = prev.length - 1
+          const last = prev[lastIdx]
+          // If last message is a streaming text, append to it
+          if (last && last.type === 'text' && (last as any)._streaming) {
+            const updated = [...prev]
+            updated[lastIdx] = {
+              ...last,
+              content: (last.content || '') + event.content
+            }
+            return updated
+          }
+          // Otherwise create a new streaming text message
+          return [...prev, {
+            chatId: event.chatId,
+            type: 'text' as const,
+            content: event.content,
+            _streaming: true
+          } as StreamEvent & { _streaming: boolean }]
+        }
+
+        // Full text message from SDK: if we have a streaming text, finalize it
+        // (the full message may duplicate content we already have from deltas, so skip it)
+        if (event.type === 'text' && event.content) {
+          const lastIdx = prev.length - 1
+          const last = prev[lastIdx]
+          if (last && last.type === 'text' && (last as any)._streaming) {
+            // Finalize: replace with the complete text and remove streaming flag
+            const updated = [...prev]
+            updated[lastIdx] = {
+              ...last,
+              content: last.content, // keep accumulated content (more complete)
+              _streaming: undefined
+            } as any
+            return updated
+          }
+        }
+
+        // Widget events: replace streaming widget in-place
         if (event.type === 'widget') {
           const idx = prev.findLastIndex((e) => e.type === 'widget')
           if (idx >= 0 && prev[idx].isStreaming) {
-            // Replace streaming widget in-place (morphdom will diff)
             const updated = [...prev]
             updated[idx] = event
             return updated
           }
-          // No existing streaming widget - append new one
         }
+
         return [...prev, event]
       })
     })

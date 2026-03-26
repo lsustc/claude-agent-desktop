@@ -1,7 +1,7 @@
 {
-  "name": "claude-agent-desktop",
+  "name": "lumi",
   "version": "1.0.0",
-  "description": "Electron desktop AI agent with Claude Agent SDK and Generative UI",
+  "description": "Lumi - A luminous AI desktop agent powered by Claude",
   "type": "module",
   "main": "./out/main/index.js",
   "scripts": {
@@ -25,6 +25,23 @@
     "shiki": "^3.2.0",
     "uuid": "^11.1.0",
     "zod": "^4.0.0"
+  },
+  "build": {
+    "appId": "com.lumi.app",
+    "productName": "Lumi",
+    "directories": {
+      "output": "dist"
+    },
+    "mac": {
+      "icon": "build/icon.icns",
+      "category": "public.app-category.developer-tools"
+    },
+    "win": {
+      "icon": "build/icon.icns"
+    },
+    "linux": {
+      "icon": "build/icon.icns"
+    }
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

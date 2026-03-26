@@ -1,4 +1,4 @@
-import { app, BrowserWindow, session, shell } from 'electron'
+import { app, BrowserWindow, session, shell, nativeImage } from 'electron'
 import { join } from 'path'
 import { execSync } from 'child_process'
 import { registerIpcHandlers } from './ipc-handlers'
@@ -68,6 +68,7 @@ function createWindow(): BrowserWindow {
     height: 800,
     minWidth: 800,
     minHeight: 600,
+    icon: join(__dirname, '../../build/icon.png'),
     titleBarStyle: 'hiddenInset',
     trafficLightPosition: { x: 16, y: 16 },
     webPreferences: {
@@ -126,6 +127,23 @@ function createWindow(): BrowserWindow {
 app.whenReady().then(() => {
   console.log('[main] App ready')
   fixPath()
+
+  // Set Dock icon on macOS
+  if (process.platform === 'darwin' && app.dock) {
+    const iconPath = join(__dirname, '../../build/icon.png')
+    try {
+      const icon = nativeImage.createFromPath(iconPath)
+      if (!icon.isEmpty()) {
+        app.dock.setIcon(icon)
+        console.log('[main] Dock icon set')
+      } else {
+        console.warn('[main] Icon image is empty:', iconPath)
+      }
+    } catch (e) {
+      console.warn('[main] Failed to set dock icon:', e)
+    }
+  }
+
   sessionStore.init()
   setupCSP()
   registerIpcHandlers()

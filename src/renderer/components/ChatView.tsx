@@ -53,7 +53,7 @@ export default function ChatView({
     return (
       <div className="flex-1 flex items-center justify-center bg-white dark:bg-gray-950">
         <div className="text-center text-gray-500 dark:text-gray-600">
-          <p className="text-2xl font-medium mb-2 text-gray-700 dark:text-gray-300">Claude Agent Desktop</p>
+          <p className="text-2xl font-medium mb-2 text-gray-700 dark:text-gray-300">Lumi</p>
           <p className="text-sm">Create a new chat to get started</p>
         </div>
       </div>

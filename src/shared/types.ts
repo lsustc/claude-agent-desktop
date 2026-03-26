@@ -12,6 +12,7 @@ export interface StreamEvent {
   chatId: string
   type:
     | 'text'
+    | 'text_delta'
     | 'tool_use'
     | 'tool_result'
     | 'widget'
