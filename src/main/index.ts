@@ -3,6 +3,7 @@ import { join } from 'path'
 import { execSync } from 'child_process'
 import { registerIpcHandlers } from './ipc-handlers'
 import { agentManager } from './agent-manager'
+import { sessionStore } from './session-store'
 
 const isDev = process.env.NODE_ENV === 'development'
 
@@ -114,9 +115,10 @@ function createWindow(): BrowserWindow {
     console.error('[main] Failed to load:', errorCode, errorDescription)
   })
 
-  if (isDev) {
-    win.webContents.openDevTools({ mode: 'detach' })
-  }
+  // Cmd+Shift+I to manually open DevTools when needed
+  // if (isDev) {
+  //   win.webContents.openDevTools({ mode: 'detach' })
+  // }
 
   return win
 }
@@ -124,6 +126,7 @@ function createWindow(): BrowserWindow {
 app.whenReady().then(() => {
   console.log('[main] App ready')
   fixPath()
+  sessionStore.init()
   setupCSP()
   registerIpcHandlers()
   createWindow()
@@ -136,6 +139,7 @@ app.whenReady().then(() => {
 })
 
 app.on('window-all-closed', () => {
+  sessionStore.flush()
   agentManager.closeAll()
   if (process.platform !== 'darwin') {
     app.quit()

@@ -19,8 +19,8 @@ export default function Sidebar({
 }: SidebarProps) {
   return (
     <div className="w-64 h-full flex flex-col bg-gray-100 dark:bg-gray-900 border-r border-gray-300 dark:border-gray-800">
-      {/* Drag region for macOS title bar */}
-      <div className="h-12 flex-shrink-0" style={{ WebkitAppRegion: 'drag' } as React.CSSProperties} />
+      {/* Spacer for macOS traffic lights */}
+      <div className="h-11 flex-shrink-0" />
 
       {/* New chat button */}
       <div className="px-3 pb-3">

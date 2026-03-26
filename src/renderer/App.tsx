@@ -34,7 +34,12 @@ function AppContent() {
   const [showSettings, setShowSettings] = useState(false)
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full relative">
+      {/* Window drag region - full width bar at top, behind content */}
+      <div
+        className="absolute top-0 left-0 right-0 h-11 z-10"
+        style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
+      />
       <Sidebar
         sessions={chat.sessions}
         selectedChatId={chat.selectedChatId}

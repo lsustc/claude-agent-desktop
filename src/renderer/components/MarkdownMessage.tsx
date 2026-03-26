@@ -1,7 +1,6 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, type ReactNode } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import rehypeRaw from 'rehype-raw'
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false)
@@ -15,28 +14,33 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="absolute top-2 right-2 px-2 py-1 text-xs bg-gray-600 text-gray-200 rounded hover:bg-gray-500 transition-colors opacity-0 group-hover:opacity-100"
+      className="absolute top-2 right-2 px-2 py-1 text-xs bg-gray-600 text-gray-200 rounded hover:bg-gray-500 transition-colors opacity-0 group-hover:opacity-100 z-10"
     >
       {copied ? 'Copied!' : 'Copy'}
     </button>
   )
 }
 
-// Open external links in system browser, not in Electron window
-function ExternalLink({ href, children }: { href?: string; children?: React.ReactNode }) {
+function extractText(node: ReactNode): string {
+  if (typeof node === 'string') return node
+  if (typeof node === 'number') return String(node)
+  if (Array.isArray(node)) return node.map(extractText).join('')
+  if (node && typeof node === 'object' && 'props' in node) {
+    return extractText((node as any).props.children)
+  }
+  return ''
+}
+
+function ExternalLink({ href, children }: { href?: string; children?: ReactNode }) {
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault()
-    if (href) {
-      // Use Electron shell.openExternal via window.open fallback
-      window.open(href, '_blank')
-    }
+    if (href) window.open(href, '_blank')
   }
-
   return (
     <a
       href={href}
       onClick={handleClick}
-      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline decoration-blue-300 dark:decoration-blue-600 underline-offset-2 transition-colors"
+      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline decoration-blue-300/50 dark:decoration-blue-500/50 underline-offset-2 transition-colors"
       title={href}
     >
       {children}
@@ -44,93 +48,94 @@ function ExternalLink({ href, children }: { href?: string; children?: React.Reac
   )
 }
 
-interface MarkdownMessageProps {
-  content: string
-}
-
-export default function MarkdownMessage({ content }: MarkdownMessageProps) {
+export default function MarkdownMessage({ content }: { content: string }) {
   return (
-    <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-headings:mt-4 prose-headings:mb-2 prose-li:my-0.5 prose-ul:my-2 prose-ol:my-2 prose-blockquote:my-3 prose-hr:my-4">
+    <div className="markdown-body text-sm leading-relaxed">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw]}
         components={{
-          // External links open in browser
           a: ExternalLink,
 
-          // Code blocks with syntax label + copy button
-          code({ className, children, ...props }) {
-            const match = /language-(\w+)/.exec(className || '')
-            const isInline = !match && !className
-
-            if (isInline) {
-              return (
-                <code
-                  className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-[0.8125rem] font-mono text-rose-600 dark:text-rose-400 not-prose"
-                  {...props}
-                >
-                  {children}
-                </code>
-              )
-            }
-
-            const codeText = String(children).replace(/\n$/, '')
+          // Code block: pre > code
+          pre({ children }) {
+            // Extract language and text from the inner <code> element
+            const codeEl = children as any
+            const className = codeEl?.props?.className || ''
+            const lang = /language-(\w+)/.exec(className)?.[1] || ''
+            const codeText = extractText(codeEl?.props?.children).replace(/\n$/, '')
 
             return (
-              <div className="group relative my-4 not-prose">
-                <div className="flex items-center justify-between px-4 py-1.5 bg-gray-800 dark:bg-gray-900 rounded-t-lg border-b border-gray-700/50">
-                  <span className="text-xs text-gray-400 font-mono">{match?.[1] || 'code'}</span>
+              <div className="group relative my-4 rounded-lg overflow-hidden border border-gray-700/50">
+                {/* Header bar */}
+                <div className="flex items-center justify-between px-4 py-1.5 bg-[#1e1e2e] border-b border-gray-700/50">
+                  <span className="text-xs text-gray-400 font-mono select-none">{lang || 'code'}</span>
+                  <CopyButton text={codeText} />
                 </div>
-                <CopyButton text={codeText} />
-                <pre className="bg-gray-800 dark:bg-gray-900 px-4 py-3 rounded-b-lg overflow-x-auto">
-                  <code className={`text-[0.8125rem] leading-relaxed text-gray-100 font-mono ${className || ''}`}>
-                    {children}
+                {/* Code content */}
+                <pre className="bg-[#1e1e2e] px-4 py-3 overflow-x-auto m-0">
+                  <code className="text-[13px] leading-[1.6] text-gray-200 font-mono whitespace-pre">
+                    {codeText}
                   </code>
                 </pre>
               </div>
             )
           },
 
-          // Tables
+          // Inline code
+          code({ children, className }) {
+            // If it has a language class, it's inside a pre block (handled above)
+            if (className) return <code className={className}>{children}</code>
+            return (
+              <code className="px-1.5 py-0.5 mx-0.5 bg-gray-100 dark:bg-gray-800 text-orange-600 dark:text-orange-400 rounded text-[0.8em] font-mono">
+                {children}
+              </code>
+            )
+          },
+
+          // Headings
+          h1({ children }) { return <h1 className="text-xl font-semibold mt-5 mb-3 text-gray-900 dark:text-gray-100">{children}</h1> },
+          h2({ children }) { return <h2 className="text-lg font-semibold mt-5 mb-2 text-gray-900 dark:text-gray-100">{children}</h2> },
+          h3({ children }) { return <h3 className="text-base font-semibold mt-4 mb-2 text-gray-900 dark:text-gray-100">{children}</h3> },
+          h4({ children }) { return <h4 className="text-sm font-semibold mt-3 mb-1 text-gray-900 dark:text-gray-100">{children}</h4> },
+
+          // Paragraph
+          p({ children }) { return <p className="my-2 text-gray-800 dark:text-gray-200">{children}</p> },
+
+          // Strong / em
+          strong({ children }) { return <strong className="font-semibold text-gray-900 dark:text-gray-100">{children}</strong> },
+
+          // Lists
+          ul({ children }) { return <ul className="my-2 ml-5 list-disc space-y-1 text-gray-800 dark:text-gray-200">{children}</ul> },
+          ol({ children }) { return <ol className="my-2 ml-5 list-decimal space-y-1 text-gray-800 dark:text-gray-200">{children}</ol> },
+          li({ children }) { return <li className="pl-1">{children}</li> },
+
+          // Table
           table({ children }) {
             return (
-              <div className="overflow-x-auto my-4 rounded-lg border border-gray-200 dark:border-gray-700 not-prose">
-                <table className="min-w-full text-sm">
-                  {children}
-                </table>
+              <div className="overflow-x-auto my-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                <table className="min-w-full text-sm">{children}</table>
               </div>
             )
           },
-          thead({ children }) {
-            return <thead className="bg-gray-50 dark:bg-gray-800">{children}</thead>
-          },
+          thead({ children }) { return <thead className="bg-gray-50 dark:bg-gray-800/80">{children}</thead> },
           th({ children }) {
-            return (
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider border-b border-gray-200 dark:border-gray-700">
-                {children}
-              </th>
-            )
+            return <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">{children}</th>
           },
           td({ children }) {
-            return (
-              <td className="px-4 py-2 text-sm border-b border-gray-100 dark:border-gray-800">
-                {children}
-              </td>
-            )
+            return <td className="px-3 py-2 text-sm border-b border-gray-100 dark:border-gray-800 text-gray-700 dark:text-gray-300">{children}</td>
           },
 
           // Blockquote
           blockquote({ children }) {
-            return (
-              <blockquote className="border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic text-gray-600 dark:text-gray-400 my-3">
-                {children}
-              </blockquote>
-            )
+            return <blockquote className="border-l-[3px] border-gray-300 dark:border-gray-600 pl-4 my-3 text-gray-500 dark:text-gray-400 italic">{children}</blockquote>
           },
 
-          // Horizontal rule
-          hr() {
-            return <hr className="my-6 border-gray-200 dark:border-gray-700" />
+          // HR
+          hr() { return <hr className="my-5 border-gray-200 dark:border-gray-700" /> },
+
+          // Image
+          img({ src, alt }) {
+            return <img src={src} alt={alt} className="max-w-full rounded-lg my-3" />
           }
         }}
       >

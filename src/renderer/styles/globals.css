@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Interactive elements must not be draggable (overrides the window drag region) */
+button, a, input, textarea, select, [role="button"], .overflow-y-auto, .overflow-x-auto {
+  -webkit-app-region: no-drag;
+}
+
 /* Widget theme variables */
 :root {
   --widget-text: #1a1a1a;
@@ -70,16 +75,24 @@
   background: #4b5563;
 }
 
-/* Code block styling */
-pre code {
-  font-size: 0.875rem;
-  line-height: 1.5;
+/* Markdown body base reset - no prose conflicts */
+.markdown-body {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
-/* Prose improvements for dark mode */
-.dark .prose {
-  --tw-prose-body: #d1d5db;
-  --tw-prose-headings: #f3f4f6;
-  --tw-prose-links: #60a5fa;
-  --tw-prose-code: #e5e7eb;
+/* Ensure code blocks don't inherit weird prose styles */
+.markdown-body pre {
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+
+.markdown-body pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
 }

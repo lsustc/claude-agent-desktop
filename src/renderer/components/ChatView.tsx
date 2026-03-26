@@ -62,6 +62,8 @@ export default function ChatView({
 
   return (
     <div className="flex-1 flex flex-col bg-white dark:bg-gray-950">
+      {/* Spacer for drag region */}
+      <div className="h-11 flex-shrink-0" />
       {/* Messages */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto px-4 py-6">
