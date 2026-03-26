@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Widget theme variables */
+:root {
+  --widget-text: #1a1a1a;
+  --widget-text-secondary: #6b7280;
+  --widget-surface: #f3f4f6;
+  --widget-border: #e5e7eb;
+  --widget-accent: #2563eb;
+  --widget-bg: transparent;
+}
+
+.dark {
+  --widget-text: #f3f4f6;
+  --widget-text-secondary: #9ca3af;
+  --widget-surface: #1f2937;
+  --widget-border: #374151;
+  --widget-accent: #3b82f6;
+}
+
+/* Widget container */
+.widget-container {
+  transition: all 0.3s ease;
+}
+
+/* Widget content wrapper fade in */
+.widget-content {
+  animation: widgetAppear 0.4s ease-out;
+}
+
+@keyframes widgetAppear {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Legacy fade-in class for morphdom */
+.widget-fade-in {
+  animation: widgetSlideIn 0.3s ease-out;
+}
+
+@keyframes widgetSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Bounce animation for loading dots */
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+.widget-container .animate-bounce {
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+/* Code block styling */
+pre code {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* Prose improvements for dark mode */
+.dark .prose {
+  --tw-prose-body: #d1d5db;
+  --tw-prose-headings: #f3f4f6;
+  --tw-prose-links: #60a5fa;
+  --tw-prose-code: #e5e7eb;
+}
