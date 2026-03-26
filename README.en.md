@@ -172,4 +172,4 @@ npm run build:linux  # Linux .AppImage
 
 ## License
 
-MIT
+[MIT](./LICENSE)
