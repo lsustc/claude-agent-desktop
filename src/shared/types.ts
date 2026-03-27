@@ -44,11 +44,19 @@ export interface StreamEvent {
   error?: string
 }
 
+export type McpServerType = 'command' | 'sse' | 'http'
+
 export interface McpServerEntry {
   id: string
   name: string
-  command: string
-  args: string[]
+  type: McpServerType
+  // command type
+  command?: string
+  args?: string[]
+  // sse / http type
+  url?: string
+  headers?: Record<string, string>
+  // common
   env?: Record<string, string>
   enabled: boolean
 }

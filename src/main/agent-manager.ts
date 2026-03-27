@@ -134,7 +134,23 @@ function startSession(chatId: string): SessionEntry {
 
   // Add user-configured MCP servers
   for (const server of userMcpServers) {
-    if (server.enabled) {
+    if (!server.enabled) continue
+
+    if (server.type === 'sse' || server.type === 'http') {
+      // SDK CLI doesn't natively support SSE/HTTP MCP.
+      // Use mcp-remote as a bridge: npx mcp-remote <url> --header Key:Value
+      const mcpArgs = ['-y', 'mcp-remote', server.url || '']
+      if (server.headers) {
+        for (const [key, value] of Object.entries(server.headers)) {
+          mcpArgs.push('--header', `${key}:${value}`)
+        }
+      }
+      mcpServers[server.name] = {
+        command: 'npx',
+        args: mcpArgs
+      }
+    } else {
+      // command type (local process)
       mcpServers[server.name] = {
         command: server.command,
         args: server.args,
@@ -153,15 +169,24 @@ function startSession(chatId: string): SessionEntry {
     }
   }
 
+  const cliPath = findClaudeCliJs()
+
+  // Build final allowedTools: configured tools + all MCP server tool wildcards
+  const finalAllowedTools = [...allowedTools]
+  for (const server of userMcpServers) {
+    if (server.enabled) {
+      // Wildcard: allow all tools from this MCP server
+      finalAllowedTools.push(`mcp__${server.name}__*`)
+    }
+  }
+
   console.log('[agent] Starting session', chatId)
   console.log('[agent] Model:', model)
-  console.log('[agent] Tools:', allowedTools.length, 'tools')
+  console.log('[agent] AllowedTools:', finalAllowedTools.join(', '))
   console.log('[agent] MCP servers:', Object.keys(mcpServers))
-  console.log('[agent] PATH:', process.env.PATH?.split(':').slice(0, 5).join(':'))
-  console.log('[agent] ANTHROPIC_API_KEY set:', !!process.env.ANTHROPIC_API_KEY)
-  console.log('[agent] HOME:', process.env.HOME)
-
-  const cliPath = findClaudeCliJs()
+  for (const [sname, cfg] of Object.entries(mcpServers)) {
+    if (sname !== 'generative-ui') console.log(`[agent]   ${sname}:`, JSON.stringify(cfg).slice(0, 150))
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const outputIterator = (query as any)({
@@ -172,7 +197,8 @@ function startSession(chatId: string): SessionEntry {
       cwd: process.env.HOME || process.cwd(),
       pathToClaudeCodeExecutable: cliPath,
       includePartialMessages: true,
-      allowedTools,
+      allowedTools: finalAllowedTools,
+      permissionMode: 'acceptEdits',
       systemPrompt,
       mcpServers,
       ...(Object.keys(agentDefs).length > 0 ? { agents: agentDefs } : {})
