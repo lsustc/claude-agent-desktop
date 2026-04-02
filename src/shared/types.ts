@@ -8,6 +8,48 @@ export interface SessionMeta {
   updatedAt: string
 }
 
+export type WorkspaceKind = 'home' | 'stock' | 'industry' | 'watchlist'
+
+export type ArtifactKind =
+  | 'dashboard'
+  | 'stock_explain'
+  | 'industry_map'
+  | 'watchlist'
+  | 'briefing'
+
+export interface WorkspaceMeta {
+  id: string
+  seedKey?: string
+  title: string
+  kind: WorkspaceKind
+  focus: string
+  summary: string
+  sessionId: string
+  pinnedSymbols: string[]
+  createdAt: string
+  updatedAt: string
+}
+
+export interface RuntimeArtifact {
+  id: string
+  workspaceId: string
+  seedKey?: string
+  title: string
+  kind: ArtifactKind
+  summary: string
+  prompt: string
+  tags: string[]
+  widgetCode?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface WorkspaceDetail extends WorkspaceMeta {
+  memoryNotes: string[]
+  suggestedPrompts: string[]
+  artifacts: RuntimeArtifact[]
+}
+
 export interface StreamEvent {
   chatId: string
   type:

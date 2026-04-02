@@ -1,12 +1,12 @@
 import { createRoot } from 'react-dom/client'
 import App from './App'
 import './styles/globals.css'
+import { initTheme } from './components/ThemePicker'
 
-// Restore dark mode preference
-const theme = localStorage.getItem('theme')
-if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-  document.documentElement.classList.add('dark')
-}
+// Apply saved theme (or Tokyo Night default)
+initTheme()
+// Always keep dark class for any remaining dark: Tailwind utilities
+document.documentElement.classList.add('dark')
 
 const root = document.getElementById('root')!
 createRoot(root).render(<App />)

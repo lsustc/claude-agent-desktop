@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import type { SessionMeta, StreamEvent } from '../../shared/types'
 
 export function useChat() {
@@ -114,10 +114,11 @@ export function useChat() {
     }
   }, [])
 
-  const sendMessage = useCallback(async (content: string) => {
-    if (!window.electronAPI || !selectedChatIdRef.current || !content.trim()) return
+  const sendMessage = useCallback(async (content: string, overrideChatId?: string) => {
+    if (!window.electronAPI || !content.trim()) return
 
-    const chatId = selectedChatIdRef.current
+    const chatId = overrideChatId || selectedChatIdRef.current
+    if (!chatId) return
 
     // Add user message locally
     const userEvent: StreamEvent = {
@@ -137,7 +138,7 @@ export function useChat() {
     setIsLoading(false)
   }, [])
 
-  return {
+  return useMemo(() => ({
     sessions,
     selectedChatId,
     messages,
@@ -147,5 +148,15 @@ export function useChat() {
     deleteSession,
     sendMessage,
     stopGeneration
-  }
+  }), [
+    sessions,
+    selectedChatId,
+    messages,
+    isLoading,
+    createSession,
+    selectSession,
+    deleteSession,
+    sendMessage,
+    stopGeneration
+  ])
 }

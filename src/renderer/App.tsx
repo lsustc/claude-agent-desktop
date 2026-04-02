@@ -1,7 +1,6 @@
 import { useState, Component, type ReactNode } from 'react'
-import { useChat } from './hooks/useChat'
-import Sidebar from './components/Sidebar'
-import ChatView from './components/ChatView'
+import { useRuntime } from './hooks/useRuntime'
+import MainView from './components/MainView'
 import SettingsPanel from './components/settings/SettingsPanel'
 
 class ErrorBoundary extends Component<
@@ -17,9 +16,9 @@ class ErrorBoundary extends Component<
   render() {
     if (this.state.error) {
       return (
-        <div style={{ padding: 40, fontFamily: 'system-ui' }}>
-          <h2 style={{ color: '#dc2626' }}>App Error</h2>
-          <pre style={{ background: '#f5f5f5', padding: 16, borderRadius: 8, whiteSpace: 'pre-wrap' }}>
+        <div style={{ padding: 40, fontFamily: 'monospace', background: '#0a0e1a', color: '#f87171', minHeight: '100vh' }}>
+          <h2>App Error</h2>
+          <pre style={{ background: '#111827', padding: 16, borderRadius: 8, whiteSpace: 'pre-wrap', color: '#fca5a5' }}>
             {this.state.error}
           </pre>
         </div>
@@ -29,34 +28,28 @@ class ErrorBoundary extends Component<
   }
 }
 
+export type AppView = 'chat' | 'settings' | 'history'
+
 function AppContent() {
-  const chat = useChat()
-  const [showSettings, setShowSettings] = useState(false)
+  const runtime = useRuntime()
+  const [view, setView] = useState<AppView>('chat')
 
   return (
-    <div className="flex h-full relative">
-      {/* Window drag region - full width bar at top, behind content */}
+    <div className="flex h-full relative bg-[#0a0e1a]">
+      {/* macOS window drag region */}
       <div
-        className="absolute top-0 left-0 right-0 h-11 z-10"
+        className="absolute top-0 left-0 right-0 h-8 z-10"
         style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
       />
-      <Sidebar
-        sessions={chat.sessions}
-        selectedChatId={chat.selectedChatId}
-        onSelectChat={chat.selectSession}
-        onNewChat={chat.createSession}
-        onDeleteChat={chat.deleteSession}
-        onOpenSettings={() => setShowSettings(true)}
-      />
-      <ChatView
-        chatId={chat.selectedChatId}
-        messages={chat.messages}
-        isLoading={chat.isLoading}
-        onSendMessage={chat.sendMessage}
-        onStop={chat.stopGeneration}
-      />
-      {showSettings && (
-        <SettingsPanel onClose={() => setShowSettings(false)} />
+
+      {view === 'settings' ? (
+        <SettingsPanel onClose={() => setView('chat')} />
+      ) : (
+        <MainView
+          runtime={runtime}
+          view={view}
+          setView={setView}
+        />
       )}
     </div>
   )

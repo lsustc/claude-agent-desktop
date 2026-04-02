@@ -8,6 +8,16 @@ export const IPC = {
   CHAT_GET_MESSAGES: 'chat:get-messages',
   CHAT_STOP: 'chat:stop',
 
+  // Runtime
+  RUNTIME_LIST_WORKSPACES: 'runtime:list-workspaces',
+  RUNTIME_GET_WORKSPACE: 'runtime:get-workspace',
+  RUNTIME_CREATE_WORKSPACE: 'runtime:create-workspace',
+  RUNTIME_DELETE_WORKSPACE: 'runtime:delete-workspace',
+  RUNTIME_UPDATE_WORKSPACE: 'runtime:update-workspace',
+  RUNTIME_REORDER_WORKSPACES: 'runtime:reorder-workspaces',
+  RUNTIME_REORDER_ARTIFACTS: 'runtime:reorder-artifacts',
+  RUNTIME_SAVE_ARTIFACT: 'runtime:save-artifact',
+
   // Config
   CONFIG_GET: 'config:get',
   CONFIG_SET: 'config:set',
