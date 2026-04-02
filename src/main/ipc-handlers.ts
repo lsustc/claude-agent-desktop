@@ -3,7 +3,8 @@ import { IPC } from '../shared/ipc-channels'
 import { configStore } from './config-store'
 import { sessionStore } from './session-store'
 import { agentManager } from './agent-manager'
-import type { AppConfig, McpServerEntry } from '../shared/types'
+import { runtimeStore } from './runtime-store'
+import type { AppConfig, ArtifactKind, McpServerEntry, WorkspaceKind } from '../shared/types'
 
 export function registerIpcHandlers(): void {
   // Chat
@@ -32,6 +33,69 @@ export function registerIpcHandlers(): void {
   ipcMain.handle(IPC.CHAT_STOP, (_event, chatId: string) => {
     agentManager.closeSession(chatId)
   })
+
+  // Runtime
+  ipcMain.handle(IPC.RUNTIME_LIST_WORKSPACES, () => {
+    return runtimeStore.list()
+  })
+
+  ipcMain.handle(IPC.RUNTIME_GET_WORKSPACE, (_event, workspaceId: string) => {
+    return runtimeStore.get(workspaceId)
+  })
+
+  ipcMain.handle(
+    IPC.RUNTIME_CREATE_WORKSPACE,
+    (_event, input?: { title?: string; focus?: string; kind?: WorkspaceKind }) => {
+      return runtimeStore.create(input)
+    }
+  )
+
+  ipcMain.handle(IPC.RUNTIME_DELETE_WORKSPACE, (_event, workspaceId: string) => {
+    const workspace = runtimeStore.get(workspaceId)
+    if (workspace?.sessionId) {
+      agentManager.closeSession(workspace.sessionId)
+    }
+    runtimeStore.delete(workspaceId)
+  })
+
+  ipcMain.handle(
+    IPC.RUNTIME_UPDATE_WORKSPACE,
+    (_event, workspaceId: string, input: { title?: string; focus?: string }) => {
+      return runtimeStore.update(workspaceId, input)
+    }
+  )
+
+  ipcMain.handle(
+    IPC.RUNTIME_REORDER_WORKSPACES,
+    (_event, sourceWorkspaceId: string, targetWorkspaceId: string) => {
+      runtimeStore.reorderWorkspaces(sourceWorkspaceId, targetWorkspaceId)
+    }
+  )
+
+  ipcMain.handle(
+    IPC.RUNTIME_REORDER_ARTIFACTS,
+    (_event, workspaceId: string, sourceArtifactId: string, targetArtifactId: string) => {
+      runtimeStore.reorderArtifacts(workspaceId, sourceArtifactId, targetArtifactId)
+    }
+  )
+
+  ipcMain.handle(
+    IPC.RUNTIME_SAVE_ARTIFACT,
+    (
+      _event,
+      workspaceId: string,
+      input: {
+        title: string
+        kind: ArtifactKind
+        summary: string
+        prompt: string
+        tags?: string[]
+        widgetCode?: string
+      }
+    ) => {
+      return runtimeStore.saveArtifact(workspaceId, input)
+    }
+  )
 
   // Config
   ipcMain.handle(IPC.CONFIG_GET, (_event, key: keyof AppConfig) => {

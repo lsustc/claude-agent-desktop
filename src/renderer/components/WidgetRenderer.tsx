@@ -6,6 +6,7 @@ interface WidgetRendererProps {
   widgetCode: string | undefined
   isStreaming: boolean
   loadingMessages: string[]
+  fullscreen?: boolean
 }
 
 function loadScriptSequentially(
@@ -141,7 +142,8 @@ export default function WidgetRenderer({
   title,
   widgetCode,
   isStreaming,
-  loadingMessages
+  loadingMessages,
+  fullscreen
 }: WidgetRendererProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const scriptsExecutedRef = useRef(false)
@@ -233,22 +235,32 @@ export default function WidgetRenderer({
 
   if (error) {
     return (
-      <div className="my-2 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-sm text-red-600 dark:text-red-400">
-        Widget error: {error}
+      <div
+        className={`p-4 text-xs font-mono ${fullscreen ? 'h-full flex items-center justify-center' : 'my-2 rounded-xl'}`}
+        style={{ border: '1px solid var(--red)', color: 'var(--red)', opacity: 0.8 }}
+      >
+        ✗ widget error: {error}
       </div>
     )
   }
 
   return (
-    <div className="widget-container my-4 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+    <div
+      className={`widget-container ${fullscreen ? 'h-full w-full overflow-auto' : 'my-4 rounded-xl overflow-hidden'}`}
+      style={fullscreen ? undefined : { border: '1px solid var(--border)' }}
+    >
       {phase === 'loading' && (
-        <div className="flex items-center gap-3 p-4">
+        <div className={`flex items-center gap-3 ${fullscreen ? 'h-full justify-center' : 'p-4'}`}>
           <div className="flex gap-1">
-            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            {[0, 150, 300].map((delay) => (
+              <span
+                key={delay}
+                className="w-1.5 h-1.5 rounded-full animate-bounce"
+                style={{ background: 'var(--accent)', animationDelay: `${delay}ms` }}
+              />
+            ))}
           </div>
-          <span className="text-sm text-gray-500 dark:text-gray-400">
+          <span className="text-sm font-mono" style={{ color: 'var(--text-dim)' }}>
             {loadingMessages[loadingMsgIndex]}
           </span>
         </div>
@@ -256,14 +268,14 @@ export default function WidgetRenderer({
 
       {phase === 'growing' && (
         <div className="flex items-center gap-2 px-4 pt-3 pb-1">
-          <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-          <span className="text-xs text-gray-400">Rendering...</span>
+          <span className="w-1 h-1 rounded-full animate-pulse" style={{ background: 'var(--accent)' }} />
+          <span className="text-xs font-mono" style={{ color: 'var(--text-dim)' }}>rendering…</span>
         </div>
       )}
 
       <div
         ref={containerRef}
-        className="widget-render-area p-4"
+        className={fullscreen ? 'widget-render-area w-full h-full p-6' : 'widget-render-area p-4'}
         data-widget-title={title}
       />
     </div>

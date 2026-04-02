@@ -1,6 +1,16 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { IPC } from '../shared/ipc-channels'
-import type { SessionMeta, StreamEvent, AppConfig, McpServerEntry } from '../shared/types'
+import type {
+  AppConfig,
+  ArtifactKind,
+  McpServerEntry,
+  RuntimeArtifact,
+  SessionMeta,
+  StreamEvent,
+  WorkspaceDetail,
+  WorkspaceKind,
+  WorkspaceMeta
+} from '../shared/types'
 
 const api = {
   // Chat
@@ -27,6 +37,48 @@ const api = {
     ipcRenderer.on(IPC.CHAT_STREAM_EVENT, handler)
     return () => ipcRenderer.removeListener(IPC.CHAT_STREAM_EVENT, handler)
   },
+
+  // Runtime
+  listWorkspaces: (): Promise<WorkspaceMeta[]> =>
+    ipcRenderer.invoke(IPC.RUNTIME_LIST_WORKSPACES),
+
+  getWorkspace: (workspaceId: string): Promise<WorkspaceDetail | undefined> =>
+    ipcRenderer.invoke(IPC.RUNTIME_GET_WORKSPACE, workspaceId),
+
+  createWorkspace: (input?: { title?: string; focus?: string; kind?: WorkspaceKind }): Promise<WorkspaceDetail> =>
+    ipcRenderer.invoke(IPC.RUNTIME_CREATE_WORKSPACE, input),
+
+  deleteWorkspace: (workspaceId: string): Promise<void> =>
+    ipcRenderer.invoke(IPC.RUNTIME_DELETE_WORKSPACE, workspaceId),
+
+  updateWorkspace: (
+    workspaceId: string,
+    input: { title?: string; focus?: string }
+  ): Promise<WorkspaceDetail | undefined> =>
+    ipcRenderer.invoke(IPC.RUNTIME_UPDATE_WORKSPACE, workspaceId, input),
+
+  reorderWorkspaces: (sourceWorkspaceId: string, targetWorkspaceId: string): Promise<void> =>
+    ipcRenderer.invoke(IPC.RUNTIME_REORDER_WORKSPACES, sourceWorkspaceId, targetWorkspaceId),
+
+  reorderArtifacts: (
+    workspaceId: string,
+    sourceArtifactId: string,
+    targetArtifactId: string
+  ): Promise<void> =>
+    ipcRenderer.invoke(IPC.RUNTIME_REORDER_ARTIFACTS, workspaceId, sourceArtifactId, targetArtifactId),
+
+  saveArtifact: (
+    workspaceId: string,
+    input: {
+      title: string
+      kind: ArtifactKind
+      summary: string
+      prompt: string
+      tags?: string[]
+      widgetCode?: string
+    }
+  ): Promise<RuntimeArtifact | undefined> =>
+    ipcRenderer.invoke(IPC.RUNTIME_SAVE_ARTIFACT, workspaceId, input),
 
   // Config
   getConfig: <K extends keyof AppConfig>(key: K): Promise<AppConfig[K]> =>

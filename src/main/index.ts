@@ -3,7 +3,9 @@ import { join } from 'path'
 import { execSync } from 'child_process'
 import { registerIpcHandlers } from './ipc-handlers'
 import { agentManager } from './agent-manager'
+import { configStore } from './config-store'
 import { sessionStore } from './session-store'
+import { runtimeStore } from './runtime-store'
 
 const isDev = process.env.NODE_ENV === 'development'
 
@@ -145,6 +147,8 @@ app.whenReady().then(() => {
   }
 
   sessionStore.init()
+  configStore.init()
+  runtimeStore.init()
   setupCSP()
   registerIpcHandlers()
   createWindow()

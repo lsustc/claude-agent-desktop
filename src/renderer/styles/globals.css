@@ -2,27 +2,129 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Interactive elements must not be draggable (overrides the window drag region) */
+/* Interactive elements must not be draggable */
 button, a, input, textarea, select, [role="button"], .overflow-y-auto, .overflow-x-auto {
   -webkit-app-region: no-drag;
 }
 
-/* Widget theme variables */
-:root {
-  --widget-text: #1a1a1a;
-  --widget-text-secondary: #6b7280;
-  --widget-surface: #f3f4f6;
-  --widget-border: #e5e7eb;
-  --widget-accent: #2563eb;
-  --widget-bg: transparent;
+/* ============================================================
+   THEMES — each sets the same set of CSS custom properties
+   ============================================================ */
+
+/* Tokyo Night (default) */
+:root, [data-theme="tokyo-night"] {
+  --bg:        #1a1b26;
+  --surface:   #16161e;
+  --border:    #2a2b3d;
+  --border-hi: #3b3d58;
+  --text:      #a9b1d6;
+  --text-dim:  #565f89;
+  --text-faint:#2a2d4a;
+  --accent:    #7aa2f7;
+  --accent-dim:#3d5488;
+  --green:     #73daca;
+  --red:       #f7768e;
+  --comment:   #444b6a;
+
+  /* widget */
+  --widget-text:           #a9b1d6;
+  --widget-text-secondary: #787c99;
+  --widget-surface:        #1e2030;
+  --widget-border:         #2a2b3d;
+  --widget-accent:         #7aa2f7;
 }
 
-.dark {
-  --widget-text: #f3f4f6;
-  --widget-text-secondary: #9ca3af;
-  --widget-surface: #1f2937;
-  --widget-border: #374151;
-  --widget-accent: #3b82f6;
+[data-theme="dracula"] {
+  --bg:        #282a36;
+  --surface:   #21222c;
+  --border:    #44475a;
+  --border-hi: #6272a4;
+  --text:      #f8f8f2;
+  --text-dim:  #6272a4;
+  --text-faint:#383a4d;
+  --accent:    #bd93f9;
+  --accent-dim:#5a3f8a;
+  --green:     #50fa7b;
+  --red:       #ff5555;
+  --comment:   #6272a4;
+
+  --widget-text:           #f8f8f2;
+  --widget-text-secondary: #6272a4;
+  --widget-surface:        #21222c;
+  --widget-border:         #44475a;
+  --widget-accent:         #bd93f9;
+}
+
+[data-theme="catppuccin"] {
+  --bg:        #1e1e2e;
+  --surface:   #181825;
+  --border:    #313244;
+  --border-hi: #585b70;
+  --text:      #cdd6f4;
+  --text-dim:  #6c7086;
+  --text-faint:#313244;
+  --accent:    #89b4fa;
+  --accent-dim:#3a4f7a;
+  --green:     #a6e3a1;
+  --red:       #f38ba8;
+  --comment:   #45475a;
+
+  --widget-text:           #cdd6f4;
+  --widget-text-secondary: #a6adc8;
+  --widget-surface:        #313244;
+  --widget-border:         #45475a;
+  --widget-accent:         #89b4fa;
+}
+
+[data-theme="nord"] {
+  --bg:        #2e3440;
+  --surface:   #252a33;
+  --border:    #3b4252;
+  --border-hi: #4c566a;
+  --text:      #d8dee9;
+  --text-dim:  #4c566a;
+  --text-faint:#343b48;
+  --accent:    #88c0d0;
+  --accent-dim:#3a5f6a;
+  --green:     #a3be8c;
+  --red:       #bf616a;
+  --comment:   #434c5e;
+
+  --widget-text:           #d8dee9;
+  --widget-text-secondary: #9099aa;
+  --widget-surface:        #3b4252;
+  --widget-border:         #4c566a;
+  --widget-accent:         #88c0d0;
+}
+
+[data-theme="one-dark"] {
+  --bg:        #282c34;
+  --surface:   #21252b;
+  --border:    #3e4452;
+  --border-hi: #528bff;
+  --text:      #abb2bf;
+  --text-dim:  #5c6370;
+  --text-faint:#3a3f4b;
+  --accent:    #61afef;
+  --accent-dim:#2d5070;
+  --green:     #98c379;
+  --red:       #e06c75;
+  --comment:   #5c6370;
+
+  --widget-text:           #abb2bf;
+  --widget-text-secondary: #7f848e;
+  --widget-surface:        #21252b;
+  --widget-border:         #3e4452;
+  --widget-accent:         #61afef;
+}
+
+/* ============================================================
+   BASE STYLES
+   ============================================================ */
+
+html, body, #root {
+  background-color: var(--bg);
+  color: var(--text);
 }
 
 /* Widget container */
@@ -30,69 +132,75 @@ button, a, input, textarea, select, [role="button"], .overflow-y-auto, .overflow
   transition: all 0.3s ease;
 }
 
-/* Widget content wrapper fade in */
 .widget-content {
   animation: widgetAppear 0.4s ease-out;
 }
 
 @keyframes widgetAppear {
   from { opacity: 0; }
-  to { opacity: 1; }
+  to   { opacity: 1; }
 }
 
-/* Legacy fade-in class for morphdom */
 .widget-fade-in {
   animation: widgetSlideIn 0.3s ease-out;
 }
 
 @keyframes widgetSlideIn {
   from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Bounce animation for loading dots */
 @keyframes bounce {
   0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-  40% { transform: scale(1); opacity: 1; }
+  40%            { transform: scale(1);   opacity: 1; }
 }
 
 .widget-container .animate-bounce {
   animation: bounce 1.4s infinite ease-in-out both;
 }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 3px;
-}
-.dark ::-webkit-scrollbar-thumb {
-  background: #4b5563;
+/* Ghost overlay */
+@keyframes ghostIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Markdown body base reset - no prose conflicts */
+@keyframes ghostOut {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-8px); }
+}
+
+.ghost-thought      { animation: ghostIn  0.3s ease-out forwards; }
+.ghost-thought-exit { animation: ghostOut 0.5s ease-in  forwards; }
+
+/* Scrollbar */
+::-webkit-scrollbar       { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* Markdown */
 .markdown-body {
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
 
-/* Ensure code blocks don't inherit weird prose styles */
-.markdown-body pre {
-  margin: 0;
-  padding: 0;
-  background: none;
-  border: none;
-}
+.markdown-body pre       { margin: 0; padding: 0; background: none; border: none; }
+.markdown-body pre code  { background: none; border: none; padding: 0; font-size: inherit; color: inherit; }
 
-.markdown-body pre code {
-  background: none;
-  border: none;
-  padding: 0;
-  font-size: inherit;
-  color: inherit;
+/* Panel animations */
+@keyframes cmdFadeIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+.cmd-palette { animation: cmdFadeIn 0.15s ease-out forwards; }
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.panel-slide-up { animation: slideUp 0.2s ease-out forwards; }
+
+/* Input glow */
+.input-glow:focus-within {
+  box-shadow: 0 0 0 1px var(--accent-dim), 0 8px 32px rgba(0,0,0,0.4);
 }
